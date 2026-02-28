@@ -13,7 +13,7 @@ const auth = require("./middilewire/auth");
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3000", // your frontend URL
+    origin: "https://wechat-wine-xi.vercel.app", // your frontend URL
     credentials: true,
   },
 });
@@ -21,7 +21,7 @@ const io = new Server(server, {
 app.use(express.json());
 app.use(
   cors({
-    origin: "http://localhost:3000", // your frontend URL
+    origin: "https://wechat-wine-xi.vercel.app", // your frontend URL
     credentials: true,
   }),
 );
