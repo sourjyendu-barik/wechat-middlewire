@@ -43,8 +43,8 @@ const register = async (req, res) => {
     // });
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // only HTTPS in prod
-      sameSite: "lax", // allows cross-site dev
+      secure: true,
+      sameSite: "none",
       maxAge: 30 * 24 * 60 * 60 * 1000,
     });
     return res.status(201).json({
@@ -90,8 +90,8 @@ const login = async (req, res) => {
     // });
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // only HTTPS in prod
-      sameSite: "lax", // allows cross-site dev
+      secure: true,
+      sameSite: "none",
       maxAge: 30 * 24 * 60 * 60 * 1000,
     });
     return res.status(200).json({
@@ -141,7 +141,9 @@ const logout = (req, res) => {
     //clear refresh token cookie
     res.clearCookie("refreshToken", {
       httpOnly: true,
-      path: "/", // 🔥 MUST MATCH ORIGINAL
+      secure: true,
+      sameSite: "none",
+      path: "/",
     });
     return res
       .status(200)
