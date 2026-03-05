@@ -33,42 +33,17 @@ app.use("/api/auth", require("./routes/auth.route"));
 app.use(auth);
 app.use("/api", require("./routes/user.routes"));
 
+//creating storage for online users
+//const onlineUsers = {};
+
 //creating socket
 io.on("connection", (socket) => {
   console.log("New user is connected", socket.id);
-  //when client send message
-  socket.on("send_message", async (data) => {
-    try {
-      const { sender, receiver, message } = data;
-      const newMessage = new Messages({ sender, receiver, message });
-      await newMessage.save();
-      socket.emit("receive_message", newMessage);
-      //how the reciver get msg
-      socket.broadcast.emit("receive_message", newMessage);
-    } catch (error) {
-      console.error("Socket message error:", error.message);
-    }
-  });
-  socket.on("typing", ({ sender, receiver }) => {
-    socket.broadcast.emit("user-typing", { sender });
-  });
-  socket.on("typing-ended", ({ sender }) => {
-    socket.broadcast.emit("user-typing-ended", { sender });
-  });
-  socket.on("disconnect", () => {
-    console.log("User disconnected", socket.id);
-  });
-  socket.on("message_delivered", async ({ messageId }) => {
-    await Messages.findByIdAndUpdate(messageId, {
-      status: "delivered",
-    });
 
-    io.emit("message_status_update", {
-      messageId,
-      status: "delivered",
-    });
-  });
+  //when user logged In store it in onlineUsers
   socket.on("user_logged_in", async (username) => {
+    //code with online user->onlineUsers[username] = socket.id; // store user socket
+    socket.join(username); //code while socket room
     try {
       // Find all undelivered messages for this receiver
       const undelivered = await Messages.find({
@@ -96,7 +71,63 @@ io.on("connection", (socket) => {
       console.error("Error marking messages delivered:", err);
     }
   });
+  //when client send message
+  socket.on("send_message", async (data) => {
+    try {
+      //first we get the data from emit() event from frontend and save
+      const { sender, receiver, message } = data;
+      const newMessage = new Messages({ sender, receiver, message });
+      await newMessage.save();
+      //then we emit message from back to sender(the sender should see the updated message)
+      socket.emit("receive_message", newMessage);
+
+      io.to(receiver).emit("receive_message", newMessage); //for sender
+      //while usung onlineuser as{}
+      // const receiverSocket = onlineUsers[receiver];
+      //if was for checking online
+      // if (receiverSocket) {
+      //   io.to(receiverSocket).emit("receive_message", newMessage);
+      // }
+    } catch (error) {
+      console.error("Socket message error:", error.message);
+    }
+  });
+  socket.on("typing", ({ sender, receiver }) => {
+    // const receiverSocket = onlineUsers[receiver];
+
+    // if (receiverSocket) {
+    //   io.to(receiverSocket).emit("user-typing", { sender });
+    // }
+    io.to(receiver).emit("user-typing", { sender });
+  });
+  socket.on("typing-ended", ({ sender, receiver }) => {
+    // const receiverSocket = onlineUsers[receiver];
+    // if (receiverSocket) {
+    //   io.to(receiverSocket).emit("user-typing-ended", { sender });
+    // }
+    io.to(receiver).emit("user-typing-sender", { sender });
+  });
+  socket.on("disconnect", () => {
+    console.log("User disconnected", socket.id);
+    for (const user in onlineUsers) {
+      if (onlineUsers[user] === socket.id) {
+        delete onlineUsers[user];
+        break;
+      }
+    }
+  });
+  socket.on("message_delivered", async ({ messageId }) => {
+    await Messages.findByIdAndUpdate(messageId, {
+      status: "delivered",
+    });
+
+    io.emit("message_status_update", {
+      messageId,
+      status: "delivered",
+    });
+  });
 });
+
 //start server
 const port = process.env.PORT;
 const startServer = async () => {
