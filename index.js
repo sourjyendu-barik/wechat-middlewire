@@ -97,15 +97,10 @@ io.on("connection", (socket) => {
     // if (receiverSocket) {
     //   io.to(receiverSocket).emit("user-typing", { sender });
     // }
-    socket.to(receiver).emit("user-typing", { sender });
+    socket.to(receiver).emit("user-typing", { sender, receiver });
   });
   socket.on("typing-ended", ({ sender, receiver }) => {
-    // const receiverSocket = onlineUsers[receiver];
-    // if (receiverSocket) {
-    //   io.to(receiverSocket).emit("user-typing-ended", { sender });
-    // }
-    // io.to(receiver).emit("user-typing-ended", { sender });
-    socket.to(receiver).emit("user-typing-ended", { sender });
+    socket.to(receiver).emit("user-typing-ended", { sender, receiver });
   });
   socket.on("disconnect", () => {
     console.log("User disconnected", socket.id);
