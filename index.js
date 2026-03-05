@@ -79,9 +79,8 @@ io.on("connection", (socket) => {
       const newMessage = new Messages({ sender, receiver, message });
       await newMessage.save();
       //then we emit message from back to sender(the sender should see the updated message)
-      socket.emit("receive_message", newMessage);
-
-      io.to(receiver).emit("receive_message", newMessage); //for sender
+      io.to(sender).emit("receive_message", newMessage);
+      io.to(receiver).emit("receive_message", newMessage);
       //while usung onlineuser as{}
       // const receiverSocket = onlineUsers[receiver];
       //if was for checking online
@@ -98,30 +97,37 @@ io.on("connection", (socket) => {
     // if (receiverSocket) {
     //   io.to(receiverSocket).emit("user-typing", { sender });
     // }
-    io.to(receiver).emit("user-typing", { sender });
+    socket.to(receiver).emit("user-typing", { sender });
   });
   socket.on("typing-ended", ({ sender, receiver }) => {
     // const receiverSocket = onlineUsers[receiver];
     // if (receiverSocket) {
     //   io.to(receiverSocket).emit("user-typing-ended", { sender });
     // }
-    io.to(receiver).emit("user-typing-sender", { sender });
+    // io.to(receiver).emit("user-typing-ended", { sender });
+    socket.to(receiver).emit("user-typing-ended", { sender });
   });
   socket.on("disconnect", () => {
     console.log("User disconnected", socket.id);
-    for (const user in onlineUsers) {
-      if (onlineUsers[user] === socket.id) {
-        delete onlineUsers[user];
-        break;
-      }
-    }
+    // for (const user in onlineUsers) {
+    //   if (onlineUsers[user] === socket.id) {
+    //     delete onlineUsers[user];
+    //     break;
+    //   }
+    // }
+    //Socket.IO automatically removes sockets from rooms.
   });
-  socket.on("message_delivered", async ({ messageId }) => {
+  socket.on("message_delivered", async ({ messageId, sender, receiver }) => {
     await Messages.findByIdAndUpdate(messageId, {
       status: "delivered",
     });
 
-    io.emit("message_status_update", {
+    io.to(sender).emit("message_status_update", {
+      messageId,
+      status: "delivered",
+    });
+
+    io.to(receiver).emit("message_status_update", {
       messageId,
       status: "delivered",
     });
