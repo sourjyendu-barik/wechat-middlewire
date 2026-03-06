@@ -16,7 +16,7 @@ const corsOptions = {
   origin: [
     "http://localhost:3000",
     "http://localhost:3001",
-    "https://wechat-wine-xi.vercel.app",
+    "https://wechat-flame.vercel.app",
   ],
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -24,14 +24,13 @@ const corsOptions = {
 };
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:3000", "https://wechat-wine-xi.vercel.app"],
+    origin: ["http://localhost:3000", "https://wechat-flame.vercel.app"],
     credentials: true,
   },
 });
 app.set("trust proxy", 1); // ⭐ IMPORTANT for Render secure cookies
 
 app.use(cors(corsOptions));
-app.options("*", cors(corsOptions));
 
 app.use(express.json());
 app.use(cookieParser());
