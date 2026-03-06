@@ -13,15 +13,22 @@ const auth = require("./middilewire/auth");
 const server = http.createServer(app);
 
 const corsOptions = {
-  // Add BOTH your local URL and your Vercel URL here
-  origin: ["http://localhost:3000", "https://wechat-wine-xi.vercel.app"],
+  origin: [
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "https://wechat-wine-xi.vercel.app",
+  ],
   credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
 };
-
 const io = new Server(server, {
   cors: corsOptions,
 });
+app.set("trust proxy", 1); // ⭐ IMPORTANT for Render secure cookies
+
 app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
+
 app.use(express.json());
 app.use(cookieParser());
 //public routes
