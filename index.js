@@ -11,20 +11,34 @@ const Messages = require("./models/db.messages");
 const { Server } = require("socket.io");
 const auth = require("./middilewire/auth");
 const server = http.createServer(app);
+// const corsOptions = {
+//   // Added  local URL and your Vercel URL here
+//   origin: ["http://localhost:3000", "https://wechat-wine-xi.vercel.app"],
+//   credentials: true,
+// };
+// const io = new Server(server, {
+//   cors: corsOptions,
+// });
+// //global middlewire
+// app.use(express.json());
+// app.use(
+//   cors({
+//     origin: "http://localhost:3000",
+//     credentials: true,
+//   }),
+// );
+const corsOptions = {
+  // Add BOTH your local URL and your Vercel URL here
+  origin: ["http://localhost:3000", "https://wechat-wine-xi.vercel.app/"],
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
+
 const io = new Server(server, {
-  cors: {
-    origin: "https://wechat-wine-xi.vercel.app", // your frontend URL
-    credentials: true,
-  },
+  cors: corsOptions,
 });
-//global middlewire
 app.use(express.json());
-app.use(
-  cors({
-    origin: "https://wechat-wine-xi.vercel.app", // your frontend URL
-    credentials: true,
-  }),
-);
 app.use(cookieParser());
 //public routes
 app.use("/api/auth", require("./routes/auth.route"));
