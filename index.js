@@ -39,6 +39,7 @@ app.use("/api/auth", require("./routes/auth.route"));
 
 //auth routes
 app.use(auth);
+
 app.use("/api", require("./routes/user.routes"));
 
 //creating storage for online users
