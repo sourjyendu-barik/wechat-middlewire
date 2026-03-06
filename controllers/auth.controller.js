@@ -46,6 +46,7 @@ const register = async (req, res) => {
       secure: true,
       sameSite: "none",
       maxAge: 30 * 24 * 60 * 60 * 1000,
+      path: "/",
     });
     return res.status(201).json({
       success: true,
@@ -93,6 +94,7 @@ const login = async (req, res) => {
       secure: true,
       sameSite: "none",
       maxAge: 30 * 24 * 60 * 60 * 1000,
+      path: "/",
     });
     return res.status(200).json({
       success: true,

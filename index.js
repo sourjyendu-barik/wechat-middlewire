@@ -20,9 +20,13 @@ const corsOptions = {
   ],
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
 };
 const io = new Server(server, {
-  cors: corsOptions,
+  cors: {
+    origin: ["http://localhost:3000", "https://wechat-wine-xi.vercel.app"],
+    credentials: true,
+  },
 });
 app.set("trust proxy", 1); // ⭐ IMPORTANT for Render secure cookies
 
@@ -135,7 +139,7 @@ io.on("connection", (socket) => {
 });
 
 //start server
-const port = process.env.PORT;
+const port = process.env.PORT || 5001;
 const startServer = async () => {
   await initializeDb();
   server.listen(port, () => console.log("Server is started with port", port));
